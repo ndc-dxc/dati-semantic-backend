@@ -1,6 +1,5 @@
 package it.gov.innovazione.ndc.validator;
 
-import it.gov.innovazione.ndc.harvester.SemanticAssetType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -17,9 +16,9 @@ class ValidatorTest {
     @Test
     void assertValidatorGetModel() {
         Stream.of(
-                Pair.of(ONTOLOGY, new OntologyValidator()),
-                Pair.of(CONTROLLED_VOCABULARY, new ControlledVocabularyValidator()),
-                Pair.of(SCHEMA, new SchemaValidator()))
+                        Pair.of(ONTOLOGY, new OntologyValidator()),
+                        Pair.of(CONTROLLED_VOCABULARY, new ControlledVocabularyValidator()),
+                        Pair.of(SCHEMA, new SchemaValidator()))
                 .forEach(pair -> {
                     assertEquals(pair.getKey(), pair.getValue().getType());
                     try {

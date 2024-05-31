@@ -1,7 +1,5 @@
 package it.gov.innovazione.ndc.integration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import it.gov.innovazione.ndc.repository.TripleStoreProperties;
 import it.gov.innovazione.ndc.repository.TripleStoreRepository;
 import it.gov.innovazione.ndc.repository.VirtuosoClient;
@@ -25,11 +23,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class TripleStoreRepositoryTest {
 
     private static String sparqlUrl;
     private static String sparqlGraphUrl;
     private static final String graphName = "http://www.fantasy.org/graph";
+    private static final String oldGraphName = "http://old.www.fantasy.org/graph";
 
     private static TripleStoreRepository repository;
 
@@ -75,7 +76,7 @@ public class TripleStoreRepositoryTest {
                 "<http://purl.org/dc/terms/accrualPeriodicity>",
                 "?o"
             )
-            .from(graphName)
+                .from(oldGraphName)
             .build();
         QueryExecution queryExecution =
             QueryExecutionFactory.sparqlService(sparqlUrl, findPeriodicity);
@@ -105,7 +106,7 @@ public class TripleStoreRepositoryTest {
                 "<http://www.w3.org/ns/dcat#keyword>",
                 "?k"
             )
-            .from(graphName)
+                .from(oldGraphName)
             .build();
         QueryExecution queryExecution =
             QueryExecutionFactory.sparqlService(sparqlUrl, keywordQuery);

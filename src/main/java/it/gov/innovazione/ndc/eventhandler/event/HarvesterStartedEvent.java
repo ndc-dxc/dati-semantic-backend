@@ -1,5 +1,6 @@
 package it.gov.innovazione.ndc.eventhandler.event;
 
+import it.gov.innovazione.ndc.harvester.model.Instance;
 import it.gov.innovazione.ndc.alerter.entities.EventCategory;
 import it.gov.innovazione.ndc.alerter.entities.Severity;
 import it.gov.innovazione.ndc.alerter.event.AlertableEvent;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class HarvesterStartedEvent implements AlertableEvent {
     private final String runId;
     private final Repository repository;
+    private final Instance instance;
     private final String revision;
 
     @Override

@@ -1,6 +1,7 @@
 package it.gov.innovazione.ndc.integration;
 
 import it.gov.innovazione.ndc.harvester.SemanticAssetType;
+import it.gov.innovazione.ndc.harvester.model.Instance;
 import it.gov.innovazione.ndc.harvester.model.index.SemanticAssetMetadata;
 import it.gov.innovazione.ndc.repository.SemanticAssetMetadataRepository;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -30,7 +31,7 @@ public class SemanticAssetMetadataRepositoryIntegrationTest {
     public static void beforeAll() {
         elastic.start();
         elasticsearchOperations = buildElasticsearchOps();
-        repository = new SemanticAssetMetadataRepository(elasticsearchOperations);
+        repository = new SemanticAssetMetadataRepository(elasticsearchOperations, new InMemoryInstanceManager());
     }
 
     @NotNull
@@ -65,6 +66,7 @@ public class SemanticAssetMetadataRepositoryIntegrationTest {
                             .repoUrl(repoName)
                             .type(type)
                             .iri(iri)
+                            .instance(Instance.PRIMARY.name())
                             .build();
                     entries.add(entry);
                 }
@@ -75,7 +77,7 @@ public class SemanticAssetMetadataRepositoryIntegrationTest {
 
         elasticsearchOperations.indexOps(SemanticAssetMetadata.class).refresh();
 
-        List<SemanticAssetMetadata> vocabs = repository.findVocabulariesForRepoUrl("http://repo1");
+        List<SemanticAssetMetadata> vocabs = repository.findVocabulariesForRepoUrl("http://repo1", Instance.PRIMARY);
         assertThat(vocabs).hasSize(ASSET_COUNT);
     }
 }

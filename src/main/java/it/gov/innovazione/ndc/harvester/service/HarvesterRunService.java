@@ -39,17 +39,19 @@ public class HarvesterRunService {
                        + "CORRELATION_ID, "
                        + "REPOSITORY_ID, "
                        + "REPOSITORY_URL, "
+                + "INSTANCE, "
                        + "REVISION, "
                        + "STARTED, "
                        + "STARTED_BY, "
                        + "FINISHED, "
                        + "STATUS, "
-                       + "REASON) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "REASON) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(query,
                 harvesterRun.getId(),
                 harvesterRun.getCorrelationId(),
                 harvesterRun.getRepositoryId(),
                 harvesterRun.getRepositoryUrl(),
+                harvesterRun.getInstance(),
                 harvesterRun.getRevision(),
                 harvesterRun.getStartedAt(),
                 harvesterRun.getStartedBy(),
@@ -116,6 +118,7 @@ public class HarvesterRunService {
                           + "CORRELATION_ID, "
                           + "REPOSITORY_ID, "
                           + "REPOSITORY_URL, "
+                + "INSTANCE, "
                           + "REVISION, "
                           + "STARTED, "
                           + "STARTED_BY, "
@@ -130,6 +133,7 @@ public class HarvesterRunService {
                         .correlationId(rs.getString("CORRELATION_ID"))
                         .repositoryId(rs.getString("REPOSITORY_ID"))
                         .repositoryUrl(rs.getString("REPOSITORY_URL"))
+                        .instance(rs.getString("INSTANCE"))
                         .revision(rs.getString("REVISION"))
                         .startedAt(getInstant(rs, "STARTED"))
                         .startedBy(rs.getString("STARTED_BY"))
