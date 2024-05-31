@@ -1,7 +1,8 @@
 package it.gov.innovazione.ndc.service;
 
+import it.gov.innovazione.ndc.eventhandler.event.ConfigService;
 import it.gov.innovazione.ndc.harvester.model.Instance;
-import it.gov.innovazione.ndc.harvester.service.ConfigService;
+
 import it.gov.innovazione.ndc.harvester.service.RepositoryService;
 import it.gov.innovazione.ndc.model.harvester.Repository;
 import it.gov.innovazione.ndc.repository.TripleStoreRepository;

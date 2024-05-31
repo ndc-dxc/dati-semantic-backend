@@ -305,7 +305,7 @@ public class ActualConfigService extends ConfigService {
     @RequiredArgsConstructor
     public enum Parser {
         TO_LONG(Long::parseLong),
-        TO_BOOLEAN(Boolean::parseBoolean),
+        TO_BOOLEAN(Parser::parseBoolean),
         TO_INSTANCE(s -> Instance.valueOf(s.toUpperCase()));
 
         private final Function<String, Object> parsingFunction;
