@@ -1,9 +1,13 @@
 package it.gov.innovazione.ndc.repository;
 
+import it.gov.innovazione.ndc.harvester.model.Instance;
 import it.gov.innovazione.ndc.harvester.model.index.SemanticAssetMetadata;
+import it.gov.innovazione.ndc.service.InstanceManager;
+import org.elasticsearch.core.List;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,11 +36,14 @@ import static org.mockito.Mockito.when;
 class SemanticAssetMetadataRepositoryTest {
     @Mock
     private ElasticsearchOperations esOps;
+    @Mock
+    private InstanceManager instanceManager;
 
     @Mock
     private SearchHits<SemanticAssetMetadata> searchHits;
     @Mock
     private SearchPage<SemanticAssetMetadata> searchPage;
+
 
     @InjectMocks
     private SemanticAssetMetadataRepository repository;
@@ -74,13 +81,13 @@ class SemanticAssetMetadataRepositoryTest {
             .build();
         when(esOps.delete(captor.capture(), any(Class.class))).thenReturn(deletedResponse);
 
-        long deleteCount = repository.deleteByRepoUrl("someRepoUrl");
+        long deleteCount = repository.deleteByRepoUrl("someRepoUrl", Instance.PRIMARY);
 
         assertThat(deleteCount).isEqualTo(1);
-        MatchQueryBuilder query = (MatchQueryBuilder) captor.getValue().getQuery();
+        BoolQueryBuilder query = (BoolQueryBuilder) captor.getValue().getQuery();
         assert query != null;
-        assertThat(query.fieldName()).isEqualTo("repoUrl");
-        assertThat(query.value()).isEqualTo("someRepoUrl");
+        assertThat(((TermQueryBuilder) query.must().get(0)).fieldName()).isEqualTo("repoUrl");
+        assertThat(((TermQueryBuilder) query.must().get(0)).value()).isEqualTo("someRepoUrl");
     }
 
     @Test
@@ -96,6 +103,8 @@ class SemanticAssetMetadataRepositoryTest {
 
     @Test
     void shouldSearchUsingQueryStringAndFiltersAndPagination() {
+        when(instanceManager.getInstances()).thenReturn(List.of());
+
         ArgumentCaptor<NativeSearchQuery> captor = ArgumentCaptor.forClass(NativeSearchQuery.class);
 
         when(esOps.search(captor.capture(), any(Class.class))).thenReturn(searchHits);
@@ -106,7 +115,7 @@ class SemanticAssetMetadataRepositoryTest {
         assertThat(searchResult.getSearchHits()).isEqualTo(searchHits);
         BoolQueryBuilder query = (BoolQueryBuilder) captor.getValue().getQuery();
         assert query != null;
-        assertThat(query.must().size()).isEqualTo(1);
+        assertThat(query.must().size()).isEqualTo(2);
         MatchQueryBuilder matchQuery = (MatchQueryBuilder) query.must().get(0);
         assertThat(matchQuery.fieldName()).isEqualTo("searchableText");
         assertThat(matchQuery.value()).isEqualTo("query");
@@ -124,6 +133,8 @@ class SemanticAssetMetadataRepositoryTest {
 
     @Test
     void shouldSearchWithoutFiltersAndSearchText() {
+        when(instanceManager.getInstances()).thenReturn(List.of());
+
         ArgumentCaptor<NativeSearchQuery> captor = ArgumentCaptor.forClass(NativeSearchQuery.class);
 
         when(esOps.search(captor.capture(), any(Class.class))).thenReturn(searchHits);
@@ -134,7 +145,7 @@ class SemanticAssetMetadataRepositoryTest {
         assertThat(searchResult.getSearchHits()).isEqualTo(searchHits);
         BoolQueryBuilder query = (BoolQueryBuilder) captor.getValue().getQuery();
         assert query != null;
-        assertThat(requireNonNull(query).must().size()).isEqualTo(1);
+        assertThat(requireNonNull(query).must().size()).isEqualTo(2);
         assertThat(query.must().get(0)).isInstanceOf(MatchAllQueryBuilder.class);
 
         assertThat(query.filter().size()).isEqualTo(0);

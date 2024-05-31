@@ -2,6 +2,7 @@ package it.gov.innovazione.ndc.harvester.harvesters;
 
 import it.gov.innovazione.ndc.harvester.AgencyRepositoryService;
 import it.gov.innovazione.ndc.harvester.model.CvPath;
+import it.gov.innovazione.ndc.harvester.model.Instance;
 import it.gov.innovazione.ndc.harvester.pathprocessors.ControlledVocabularyPathProcessor;
 import it.gov.innovazione.ndc.harvester.service.ConfigService;
 import org.junit.jupiter.api.Test;
@@ -51,9 +52,9 @@ class ControlledVocabularyHarvesterTest {
     void shouldCleanIndicesBeforeHarvesting() {
         String repoUrl = "my-repo.git";
 
-        harvester.cleanUpBeforeHarvesting(repoUrl);
+        harvester.cleanUpBeforeHarvesting(repoUrl, Instance.PRIMARY);
 
-        verify(pathProcessor).dropCsvIndicesForRepo(repoUrl);
+        verify(pathProcessor).dropCsvIndicesForRepo(repoUrl, Instance.PRIMARY);
     }
 
     @Test

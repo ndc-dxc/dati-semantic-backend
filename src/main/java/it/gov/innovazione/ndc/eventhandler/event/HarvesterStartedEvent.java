@@ -1,5 +1,6 @@
 package it.gov.innovazione.ndc.eventhandler.event;
 
+import it.gov.innovazione.ndc.harvester.model.Instance;
 import it.gov.innovazione.ndc.model.harvester.Repository;
 import lombok.Builder;
 import lombok.Data;
@@ -9,5 +10,6 @@ import lombok.Data;
 public class HarvesterStartedEvent {
     private final String runId;
     private final Repository repository;
+    private final Instance instance;
     private final String revision;
 }

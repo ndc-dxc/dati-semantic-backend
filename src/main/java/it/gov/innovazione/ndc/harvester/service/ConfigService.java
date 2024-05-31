@@ -13,7 +13,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class ConfigService {
 
-    private <T> Optional<T> fromGlobal(ActualConfigService.ConfigKey key) {
+    public <T> Optional<T> fromGlobal(ActualConfigService.ConfigKey key) {
         try {
             Class<T> type = null;
             return Optional.ofNullable(getNdcConfiguration())
@@ -27,7 +27,7 @@ public abstract class ConfigService {
         }
     }
 
-    private <T> Optional<T> fromRepo(ActualConfigService.ConfigKey key, String repoId) {
+    public <T> Optional<T> fromRepo(ActualConfigService.ConfigKey key, String repoId) {
         try {
             Class<T> type = null;
 

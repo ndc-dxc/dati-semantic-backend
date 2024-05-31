@@ -1,8 +1,11 @@
 package it.gov.innovazione.ndc.repository;
 
+import it.gov.innovazione.ndc.harvester.model.Instance;
 import it.gov.innovazione.ndc.harvester.model.index.SemanticAssetMetadata;
+import it.gov.innovazione.ndc.service.InstanceManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
@@ -35,6 +38,7 @@ import static org.springframework.data.elasticsearch.core.SearchHitSupport.searc
 @Slf4j
 public class SemanticAssetMetadataRepository {
     private final ElasticsearchOperations esOps;
+    private final InstanceManager instanceManager;
 
     public SearchPage<SemanticAssetMetadata> search(String queryPattern, Set<String> types,
                                                     Set<String> themes, Set<String> rightsHolder,
@@ -44,6 +48,10 @@ public class SemanticAssetMetadataRepository {
 
         addFilters(types, themes, rightsHolder, boolQuery);
 
+        BoolQueryBuilder conditionForInstances = getConditionForInstances();
+
+        boolQuery.must(conditionForInstances);
+
         NativeSearchQuery query = new NativeSearchQueryBuilder()
                 .withQuery(boolQuery)
                 .withPageable(pageable)
@@ -51,12 +59,36 @@ public class SemanticAssetMetadataRepository {
         return searchPageFor(esOps.search(query, SemanticAssetMetadata.class), pageable);
     }
 
+    private BoolQueryBuilder getConditionForInstances() {
+        List<Pair<String, Instance>> currentInstances = instanceManager.getInstances();
+
+        BoolQueryBuilder query = new BoolQueryBuilder();
+
+        currentInstances.stream()
+                .map(pair -> getBoolQueryForOneRepo(
+                        pair.getKey(),
+                        pair.getValue()))
+                .forEach(query::should);
+
+        return query;
+    }
+
+    private BoolQueryBuilder getBoolQueryForOneRepo(String key, Instance value) {
+        BoolQueryBuilder query = new BoolQueryBuilder();
+
+        return query.must(termQuery("repoUrl", key))
+                .must(termQuery("instance", value.name()));
+    }
+
     public Optional<SemanticAssetMetadata> findByIri(String iri) {
         return Optional.ofNullable(esOps.get(iri, SemanticAssetMetadata.class));
     }
 
-    public long deleteByRepoUrl(String repoUrl) {
-        return esOps.delete(new NativeSearchQuery(matchQuery("repoUrl", repoUrl)),
+    public long deleteByRepoUrl(String repoUrl, Instance instance) {
+        QueryBuilder queryBuilder = boolQuery()
+                .must(termQuery("repoUrl", repoUrl))
+                .must(termQuery("instance", instance.name()));
+        return esOps.delete(new NativeSearchQuery(queryBuilder),
                 SemanticAssetMetadata.class).getDeleted();
     }
 
@@ -87,9 +119,10 @@ public class SemanticAssetMetadataRepository {
         return textSearch;
     }
 
-    public List<SemanticAssetMetadata> findVocabulariesForRepoUrl(String repoUrl) {
+    public List<SemanticAssetMetadata> findVocabulariesForRepoUrl(String repoUrl, Instance instance) {
         QueryBuilder queryBuilder = boolQuery()
                 .must(termQuery("repoUrl", repoUrl))
+                .must(termQuery("instance", instance.name()))
                 .must(termQuery("type", CONTROLLED_VOCABULARY.name()));
         NativeSearchQuery query = new NativeSearchQueryBuilder().withQuery(queryBuilder).build();
         SearchHits<SemanticAssetMetadata> hits = esOps.search(query, SemanticAssetMetadata.class);

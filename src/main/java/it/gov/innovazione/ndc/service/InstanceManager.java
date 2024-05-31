@@ -1,0 +1,19 @@
+package it.gov.innovazione.ndc.service;
+
+import it.gov.innovazione.ndc.harvester.model.Instance;
+import it.gov.innovazione.ndc.model.harvester.Repository;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
+
+public interface InstanceManager {
+    Instance getNextOnlineInstance(String repoUrl);
+
+    Instance getNextOnlineInstance(Repository repository);
+
+    Instance getCurrentInstance(Repository repository);
+
+    void switchInstances(Repository repository);
+
+    List<Pair<String, Instance>> getInstances();
+}
