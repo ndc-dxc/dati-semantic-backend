@@ -20,12 +20,12 @@ public class HarvesterStartedEvent implements AlertableEvent {
 
     @Override
     public String getName() {
-        return "Run " + runId + " started";
+        return "Run " + runId + " started on instance " + instance;
     }
 
     @Override
     public String getDescription() {
-        return "Harvester run " + runId + " started";
+        return "Run " + runId + " started on instance " + instance + " for repository " + repository.getUrl() + " with revision " + revision;
     }
 
     @Override

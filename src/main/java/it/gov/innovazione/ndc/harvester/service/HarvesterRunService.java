@@ -35,16 +35,16 @@ public class HarvesterRunService {
 
     public int saveHarvesterRun(HarvesterRun harvesterRun) {
         String query = "INSERT INTO HARVESTER_RUN ("
-                       + "ID, "
-                       + "CORRELATION_ID, "
-                       + "REPOSITORY_ID, "
-                       + "REPOSITORY_URL, "
+                + "ID, "
+                + "CORRELATION_ID, "
+                + "REPOSITORY_ID, "
+                + "REPOSITORY_URL, "
                 + "INSTANCE, "
-                       + "REVISION, "
-                       + "STARTED, "
-                       + "STARTED_BY, "
-                       + "FINISHED, "
-                       + "STATUS, "
+                + "REVISION, "
+                + "STARTED, "
+                + "STARTED_BY, "
+                + "FINISHED, "
+                + "STATUS, "
                 + "REASON) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         return jdbcTemplate.update(query,
                 harvesterRun.getId(),
@@ -75,14 +75,14 @@ public class HarvesterRunService {
 
     private boolean isAlreadyRunning(HarvesterRun harvesterRun, Repository repository) {
         return (
-                       harvesterRun.getRepositoryId().equals(repository.getId())
-                       || startsWithIgnoreCase(
-                               harvesterRun.getRepositoryUrl(),
-                               repository.getUrl())
-                       || startsWithIgnoreCase(
-                               repository.getUrl(),
-                               harvesterRun.getRepositoryUrl()))
-               && harvesterRun.getStatus() == HarvesterRun.Status.RUNNING;
+                harvesterRun.getRepositoryId().equals(repository.getId())
+                        || startsWithIgnoreCase(
+                        harvesterRun.getRepositoryUrl(),
+                        repository.getUrl())
+                        || startsWithIgnoreCase(
+                        repository.getUrl(),
+                        harvesterRun.getRepositoryUrl()))
+                && harvesterRun.getStatus() == HarvesterRun.Status.RUNNING;
     }
 
     public boolean isHarvestingAlreadyExecuted(String repositoryId, String revision) {
@@ -96,10 +96,10 @@ public class HarvesterRunService {
 
     public int updateHarvesterRun(HarvesterRun harvesterRun) {
         String query = "UPDATE HARVESTER_RUN SET "
-                       + "FINISHED = ?, "
-                       + "STATUS = ?, "
-                       + "REASON = ? "
-                       + "WHERE ID = ?";
+                + "FINISHED = ?, "
+                + "STATUS = ?, "
+                + "REASON = ? "
+                + "WHERE ID = ?";
         return jdbcTemplate.update(query,
                 harvesterRun.getEndedAt(),
                 harvesterRun.getStatus().toString(),
@@ -114,19 +114,19 @@ public class HarvesterRunService {
 
     public List<HarvesterRun> getAllRuns() {
         String sqlQuery = "SELECT "
-                          + "ID, "
-                          + "CORRELATION_ID, "
-                          + "REPOSITORY_ID, "
-                          + "REPOSITORY_URL, "
+                + "ID, "
+                + "CORRELATION_ID, "
+                + "REPOSITORY_ID, "
+                + "REPOSITORY_URL, "
                 + "INSTANCE, "
-                          + "REVISION, "
-                          + "STARTED, "
-                          + "STARTED_BY, "
-                          + "FINISHED, "
-                          + "STATUS, "
-                          + "REASON "
-                          + "FROM HARVESTER_RUN "
-                          + "ORDER BY STARTED DESC";
+                + "REVISION, "
+                + "STARTED, "
+                + "STARTED_BY, "
+                + "FINISHED, "
+                + "STATUS, "
+                + "REASON "
+                + "FROM HARVESTER_RUN "
+                + "ORDER BY STARTED DESC";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) ->
                 HarvesterRun.builder()
                         .id(rs.getString("ID"))
@@ -176,9 +176,9 @@ public class HarvesterRunService {
 
     private boolean matchRunning(HarvesterRun harvesterRun, String threadName) {
         return contains(threadName, harvesterRun.getRepositoryId())
-               && contains(threadName, harvesterRun.getRevision())
-               && contains(threadName, harvesterRun.getId())
-               && endsWithIgnoreCase(threadName, "RUNNING");
+                && contains(threadName, harvesterRun.getRevision())
+                && contains(threadName, harvesterRun.getId())
+                && endsWithIgnoreCase(threadName, "RUNNING");
     }
 
     private void delete(HarvesterRun harvesterRun) {
