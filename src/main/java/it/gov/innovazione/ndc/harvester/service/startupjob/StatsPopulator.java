@@ -14,18 +14,17 @@ import it.gov.innovazione.ndc.harvester.service.RepositoryService;
 import it.gov.innovazione.ndc.model.harvester.HarvesterRun;
 import it.gov.innovazione.ndc.model.harvester.Repository;
 import jakarta.annotation.PostConstruct;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -73,40 +72,64 @@ public class StatsPopulator implements StartupJob {
     Map<String, String> repoIdByUrl =
         repositoryService.getActiveRepos().stream()
             .collect(toMap(Repository::getUrl, Repository::getId));
+    List<HarvesterRun> allRuns = harvesterRunService.getAllRuns();
     runsByDate.forEach(
         (date, repos) -> {
           log.info("Harvesting repos for date {}", date);
-          repos.forEach(
-              repoAndSha -> {
-                log.info("Harvesting repo {} for date {}", repoAndSha.getUrl(), date);
-                if (repoIdByUrl.containsKey(repoAndSha.getUrl())) {
-                    JobExecutionResponse harvest = harvesterJob.harvest(
-                            repoIdByUrl.get(repoAndSha.getUrl()), repoAndSha.getSha(), false);
-                    updateHarvesterRun(harvest, date);
-                } else {
-                  log.warn("Repo {} not found", repoAndSha.getUrl());
-                }
-              });
+          repos.stream()
+              .filter(repoAndSha -> wasNotHarvestedAlready(allRuns, repoAndSha))
+              .forEach(
+                  repoAndSha -> {
+                    log.info("Harvesting repo {} for date {}", repoAndSha.getUrl(), date);
+                    if (repoIdByUrl.containsKey(repoAndSha.getUrl())) {
+                      JobExecutionResponse harvest =
+                          harvesterJob.harvest(
+                              repoIdByUrl.get(repoAndSha.getUrl()), repoAndSha.getSha(), false);
+                      updateHarvesterRun(harvest, date);
+                    } else {
+                      log.warn("Repo {} not found", repoAndSha.getUrl());
+                    }
+                  });
         });
   }
 
-    private void updateHarvesterRun(JobExecutionResponse harvest, Date date) {
-        HarvesterRun byId = harvesterRunService.getById(harvest.getRunId());
-        Instant newStart =
-                LocalDateTime.of(
-                        LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()),
-                        byId.getStartedAt().atZone(ZoneId.systemDefault()).toLocalTime())
-                        .atZone(ZoneId.systemDefault()).toInstant();
-        Instant newEnd =
-                LocalDateTime.of(
-                        LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()),
-                        byId.getEndedAt().atZone(ZoneId.systemDefault()).toLocalTime())
-                        .atZone(ZoneId.systemDefault()).toInstant();
+  private boolean wasNotHarvestedAlready(List<HarvesterRun> allRuns, RepoAndSha repoAndSha) {
+    Set<HarvesterRun> collect =
+        allRuns.stream()
+            .filter(harvesterRun -> harvesterRun.getStatus() == HarvesterRun.Status.SUCCESS)
+            .filter(
+                harvesterRun ->
+                    harvesterRun.getRepositoryUrl().equals(repoAndSha.getUrl())
+                        && harvesterRun.getRevision().equals(repoAndSha.getSha()))
+            .collect(Collectors.toSet());
 
-        harvesterRunService.updateHarvesterRunStarted(byId.getId(), newStart, newEnd );
-    }
+    collect.forEach(
+        harvesterRun -> {
+          log.info("Harvested already: [repo: {}, revision: {}", harvesterRun.getRepositoryUrl(), harvesterRun.getRevision());
+        });
 
-    private void populateRepoIfNecessary() {
+    return collect.isEmpty();
+  }
+
+  private void updateHarvesterRun(JobExecutionResponse harvest, Date date) {
+    HarvesterRun byId = harvesterRunService.getById(harvest.getRunId());
+    Instant newStart =
+        LocalDateTime.of(
+                LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()),
+                byId.getStartedAt().atZone(ZoneId.systemDefault()).toLocalTime())
+            .atZone(ZoneId.systemDefault())
+            .toInstant();
+    Instant newEnd =
+        LocalDateTime.of(
+                LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()),
+                byId.getEndedAt().atZone(ZoneId.systemDefault()).toLocalTime())
+            .atZone(ZoneId.systemDefault())
+            .toInstant();
+
+    harvesterRunService.updateHarvesterRunStarted(byId.getId(), newStart, newEnd);
+  }
+
+  private void populateRepoIfNecessary() {
     Map<String, Repository> repoByUrl =
         repositoryService.getActiveRepos().stream()
             .collect(
