@@ -70,7 +70,7 @@ public class SimpleHarvestRepositoryProcessor {
         Thread.currentThread().setName(THREAD_PREFIX + "|" + runId + "|" + repoId + "|" + revision + "|" + status);
     }
 
-    @Async
+    //@Async
     public void execute(String runId, Repository repository, String correlationId, String revision, boolean force, String currentUserLogin) {
         try {
             setThreadName(runId, repository.getId(), revision, "RUNNING");

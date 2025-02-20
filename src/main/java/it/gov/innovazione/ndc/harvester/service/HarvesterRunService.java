@@ -96,6 +96,39 @@ public class HarvesterRunService {
                 .filter(harvesterRun -> equalsIgnoreCase(harvesterRun.getRevision(), revision));
     }
 
+    public HarvesterRun getById(String runId) {
+        String sqlQuery = "SELECT "
+                + "ID, "
+                + "CORRELATION_ID, "
+                + "REPOSITORY_ID, "
+                + "REPOSITORY_URL, "
+                + "INSTANCE, "
+                + "REVISION, "
+                + "REVISION_COMMITTED_AT, "
+                + "STARTED, "
+                + "STARTED_BY, "
+                + "FINISHED, "
+                + "STATUS, "
+                + "REASON "
+                + "FROM HARVESTER_RUN "
+                + "WHERE ID = ?";
+        return jdbcTemplate.queryForObject(sqlQuery, new Object[]{runId}, (rs, rowNum) ->
+                HarvesterRun.builder()
+                        .id(rs.getString("ID"))
+                        .correlationId(rs.getString("CORRELATION_ID"))
+                        .repositoryId(rs.getString("REPOSITORY_ID"))
+                        .repositoryUrl(rs.getString("REPOSITORY_URL"))
+                        .instance(rs.getString("INSTANCE"))
+                        .revision(rs.getString("REVISION"))
+                        .revisionCommittedAt(getInstant(rs, "REVISION_COMMITTED_AT"))
+                        .startedAt(getInstant(rs, "STARTED"))
+                        .startedBy(rs.getString("STARTED_BY"))
+                        .endedAt(getInstant(rs, "FINISHED"))
+                        .status(getStatusSafely(rs))
+                        .reason(rs.getString("REASON"))
+                        .build());
+    }
+
     public int updateHarvesterRun(HarvesterRun harvesterRun) {
         String query = "UPDATE HARVESTER_RUN SET "
                 + "FINISHED = ?, "
@@ -107,6 +140,17 @@ public class HarvesterRunService {
                 harvesterRun.getStatus().toString(),
                 harvesterRun.getReason(),
                 harvesterRun.getId());
+    }
+
+    public int updateHarvesterRunStarted(String id, Instant start, Instant end) {
+        String query = "UPDATE HARVESTER_RUN SET "
+                + "STARTED = ?, "
+                + "FINISHED = ? "
+                + "WHERE ID = ?";
+        return jdbcTemplate.update(query,
+                start,
+                end,
+                id);
     }
 
     public int updateHarvesterRunCommittedAt(HarvesterRun harvesterRun) {

@@ -1,20 +1,21 @@
 package it.gov.innovazione.ndc.harvester.service;
 
+import static it.gov.innovazione.ndc.service.logging.NDCHarvesterLogger.logSemanticInfo;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.util.StringUtils.startsWithIgnoreCase;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.gov.innovazione.ndc.controller.RepositoryController;
 import it.gov.innovazione.ndc.harvester.model.index.RightsHolder;
 import it.gov.innovazione.ndc.model.harvester.Repository;
 import it.gov.innovazione.ndc.service.logging.HarvesterStage;
 import it.gov.innovazione.ndc.service.logging.LoggingContext;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
-
 import java.security.Principal;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,14 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static it.gov.innovazione.ndc.service.logging.NDCHarvesterLogger.logSemanticInfo;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-import static org.springframework.util.StringUtils.startsWithIgnoreCase;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -98,13 +98,20 @@ public class RepositoryService {
 
         log.warn("No repositories found in the database. Using the default repositories from configuration");
 
-        List<Repository> defaultRepositories = Optional.ofNullable(repositories)
-                .map(s -> s.split(","))
-                .map(Arrays::asList)
-                .orElse(emptyList())
-                .stream()
-                .map(RepositoryUtils::asRepo)
-                .collect(toList());
+    List<Repository> defaultRepositories =
+        Optional.ofNullable(repositories)
+            .filter(StringUtils::isNotBlank)
+            .map(s -> s.split(","))
+            .map(Arrays::asList)
+            .orElse(emptyList())
+            .stream()
+            .map(RepositoryUtils::asRepo)
+            .collect(toList());
+
+    if (defaultRepositories.isEmpty()) {
+      log.error("No default repositories found in configuration");
+      return emptyList();
+    }
 
         saveDefaultRepositories(defaultRepositories);
 
@@ -165,8 +172,19 @@ public class RepositoryService {
                 .findFirst();
     }
 
-    @SneakyThrows
-    public void createRepo(String url, String name, String description, Long maxFileSizeBytes, Principal principal) {
+  public void createRepo(
+      String url, String name, String description, Long maxFileSizeBytes, Principal principal) {
+    createRepo(url, name, description, maxFileSizeBytes, principal, Optional.empty());
+  }
+
+  @SneakyThrows
+  public void createRepo(
+      String url,
+      String name,
+      String description,
+      Long maxFileSizeBytes,
+      Principal principal,
+      Optional<Instant> createdAt) {
         if (repoAlreadyExists(url)) {
             log.info("Repository {} already exists, reactivating", url);
             reactivate(url, name, description, maxFileSizeBytes, principal);
@@ -203,18 +221,19 @@ public class RepositoryService {
                        + "UPDATED_BY,"
                        + "MAX_FILE_SIZE_BYTES) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        jdbcTemplate.update(query,
-                RepositoryUtils.generateId(),
-                url,
-                name,
-                description,
-                principal.getName(),
-                true,
-                java.sql.Timestamp.from(java.time.Instant.now()),
-                principal.getName(),
-                java.sql.Timestamp.from(java.time.Instant.now()),
-                principal.getName(),
-                maxFileSizeBytes);
+    jdbcTemplate.update(
+        query,
+        RepositoryUtils.generateId(),
+        url,
+        name,
+        description,
+        principal.getName(),
+        true,
+        java.sql.Timestamp.from(createdAt.orElse(java.time.Instant.now())),
+        principal.getName(),
+        java.sql.Timestamp.from(java.time.Instant.now()),
+        principal.getName(),
+        maxFileSizeBytes);
     }
 
     private boolean repoAlreadyExists(String url) {

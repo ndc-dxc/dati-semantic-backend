@@ -69,13 +69,14 @@ public class AgencyRepositoryService {
     public Path cloneRepo(String repoUrl, String revision) throws IOException {
         Path cloneDir = fileUtils.createTempDirectory(TEMP_DIR_PREFIX);
         log.info("Cloning repo {} @ revision {}, at location {}", repoUrl, revision, cloneDir);
-        Instant instant = gitUtils.cloneRepoAndGetLastCommitDate(repoUrl, cloneDir.toFile(), revision);
+        GitUtils.ClonedRepoInfo clonedRepoInfo = gitUtils.cloneRepoAndGetLastCommitDate(repoUrl, cloneDir, revision);
+
         eventPublisher.publishEvent("harvester", "harvester.get.commit.date", null, "harvester",
                 HarvesterUpdateCommitDateEvent.builder()
                         .runId(HarvesterRun.getCurrentRunId())
-                        .commitDate(instant)
+                        .commitDate(clonedRepoInfo.instant())
                         .build());
-        return cloneDir;
+        return clonedRepoInfo.tempDirectory();
     }
 
     public List<CvPath> getControlledVocabularyPaths(Path clonedRepo) {
@@ -87,7 +88,7 @@ public class AgencyRepositoryService {
     }
 
     public void removeClonedRepo(Path repoPath) throws IOException {
-        fileUtils.removeDirectory(repoPath);
+        //fileUtils.removeDirectory(repoPath);
     }
 
     public List<SemanticAssetPath> getSchemaPaths(Path clonedRepoPath) {

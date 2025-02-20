@@ -1,0 +1,170 @@
+{
+  "2023-06-01": [
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "ff43f7185b67254ea5fc4a8c9b69c1af2730dd38"
+    }
+  ],
+  "2023-11-15": [
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "b2f9729507bace5e0f7b72fe959bab0e9cf3c26d"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "82f781f525d4b14a5a6d58b85d47e9e9ca54872b"
+    }
+  ],
+  "2024-02-15": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "57466f813f481ba2b1eacb153c29adb4768dec72"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "5c606ae11580b13a4be5b72744cccc1f15298d1b"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "f824e1f541c6308473412e46edc093fd1d40149c"
+    }
+  ],
+  "2024-03-12": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "9c16f304ea69914a945544e22335bf37f300ae24"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "2ac4865d9ce05a3c9b1d5e9eb251ecf3817baa24"
+    }
+  ],
+  "2024-03-21": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "abe15dc9044b8200b1c6eb04f59accaf8b6510d5"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "840429eb8b1fcfb0b5f6d3d3b305d695fb66de39"
+    }
+  ],
+  "2024-04-15": [
+    {
+      "url": "https://github.com/Bluarancio/Leo-OpenData",
+      "sha": "88c3f89e0ca7c5d833cb725b17dde173a9881d00"
+    },
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "892da0543e41a0c940db7134fa0bbecebd936ec1"
+    },
+    {
+      "url": "https://github.com/isprambiente/dati-semantic",
+      "sha": "e04e3e77dd2f7e5e656e368e3c086a8dc069b690"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "62d5b183e8ab9533602499ae2f564efa47c967c2"
+    }
+  ],
+  "2024-05-08": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "7985d7290c61f7797324bb37acee7c5746976bca"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "f14a288baf7bbfdba97111fc7482bf6aced56838"
+    }
+  ],
+  "2024-07-12": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "f9b83ba36e73bf8e5b288b5dc5b818bd2ae56331"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "67ba6b37f7762b1e1851c3d8eed7b7f618fd3642"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "c28bdc753dbc515faf5d5d2c1128bb0ac2d1204b"
+    }
+  ],
+  "2024-07-19": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "9652f270fcd805abcc88362c47837e2a9e396b9c"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "83fb59ffcb824d416853e6161afcd8c283abc962"
+    }
+  ],
+  "2024-07-29": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "70fdd3294abd6e65e96b63e9d85273f7ebc8ae34"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "80d7b5806cee08a94bab3975e49a5899f754ac69"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "5b69d46579370b383d146319b78f7bd059b68902"
+    }
+  ],
+  "2024-07-30": [
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "39d7bc391de175c90e3d7ffdc61efda1fab847c9"
+    }
+  ],
+  "2024-09-12": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "44a0c0536a7e67bfc75db8e1f90eb6b94643d6a7"
+    },
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "7bf68867e3376f5a81c85a8667fc98ef7ce8f9f2"
+    },
+    {
+      "url": "https://github.com/isprambiente/dati-semantic",
+      "sha": "0f6cb587aad79b42bd2cadd46bf77f2b6e0ae1d2"
+    }
+  ],
+  "2024-10-16": [
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "bf0719c989fde41b73b8d9ac27139e37943fa046"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "eb6b193e2b6e170ea42c874c30be3999a6ed7390"
+    }
+  ],
+  "2025-01-01": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "7ee05c32d0e224a7577efa9adc6da6ded44917ae"
+    },
+    {
+      "url": "https://github.com/italia/daf-ontologie-vocabolari-controllati",
+      "sha": "d8596aeeb28fa0869ff9ace870b42ae45390a89f"
+    }
+  ],
+  "2025-01-30": [
+    {
+      "url": "https://github.com/INPS-it/NDC",
+      "sha": "9b61d5c1504cfe2c543eeaccade25f2b48a5913e"
+    }
+  ],
+  "2025-02-17": [
+    {
+      "url": "https://github.com/InailUfficio5/inail-ndc",
+      "sha": "49caa183c2e5213d405536104a5a1b949619b284"
+    }
+  ]
+}

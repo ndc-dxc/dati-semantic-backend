@@ -30,14 +30,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SemanticContentStatsService {
 
-  public static final String HAS_STATS_QUERY =
-      """
-            select 1
-            where exists (select 1
-                          from SEMANTIC_CONTENT_STATS SCS
-                                   JOIN LATEST_HARVESTER_RUN_BY_YEAR LHRBY on SCS.HARVESTER_RUN_ID = LHRBY.ID
-                          where YEAR(LHRBY.STARTED) = ?);
-            """;
   public static final String GET_STATS_QUERY =
       """
               select SCS.RESOURCE_URI,
@@ -143,11 +135,6 @@ public class SemanticContentStatsService {
               .build();
       HarvestExecutionContextUtils.addSemanticContentStat(stats);
     }
-  }
-
-  public boolean hasStats(int year) {
-    Boolean result = jdbcTemplate.query(HAS_STATS_QUERY, ResultSet::next, year);
-    return Optional.ofNullable(result).orElse(false);
   }
 
   public SemanticAssetStats getStats(int year) {
