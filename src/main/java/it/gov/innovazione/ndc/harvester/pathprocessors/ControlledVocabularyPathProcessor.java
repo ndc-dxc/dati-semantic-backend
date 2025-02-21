@@ -5,6 +5,7 @@ import static it.gov.innovazione.ndc.service.logging.NDCHarvesterLogger.logSeman
 
 import it.gov.innovazione.ndc.harvester.csv.CsvParser;
 import it.gov.innovazione.ndc.harvester.csv.CsvParser.CsvData;
+import it.gov.innovazione.ndc.harvester.exception.SinglePathProcessingException;
 import it.gov.innovazione.ndc.harvester.model.ControlledVocabularyModel;
 import it.gov.innovazione.ndc.harvester.model.CvPath;
 import it.gov.innovazione.ndc.harvester.model.HarvesterStatsHolder;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.elasticsearch.BulkFailureException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -62,7 +64,7 @@ public class ControlledVocabularyPathProcessor extends BaseSemanticAssetPathProc
                     .additionalInfo("agencyId", agencyId)
                     .build());
 
-            parseAndIndexCsv(vocabularyIdentifier, p);
+            tryParseAndIndexCsv(vocabularyIdentifier, p);
         });
 
         return harvesterStatsHolder;
@@ -78,9 +80,27 @@ public class ControlledVocabularyPathProcessor extends BaseSemanticAssetPathProc
         path.getCsvPath().ifPresent(p -> model.addNdcDataServiceProperties(baseUrl));
     }
 
-    private void parseAndIndexCsv(VocabularyIdentifier vocabularyIdentifier, String csvPath) {
-        CsvData flatData = csvParser.loadCsvDataFromFile(csvPath);
-        vocabularyDataService.indexData(vocabularyIdentifier, flatData);
+    private void tryParseAndIndexCsv(VocabularyIdentifier vocabularyIdentifier, String csvPath) {
+        try {
+            CsvData flatData = csvParser.loadCsvDataFromFile(csvPath);
+            vocabularyDataService.indexData(vocabularyIdentifier, flatData);
+        } catch (Exception e) {
+            // falliscono oneri_detraibili.csv e codice_estero.csv del repository INPS, perchè il campo id è vuoto
+            if (e instanceof BulkFailureException bulkFailureException) {
+                bulkFailureException.getFailedDocuments().entrySet()
+                    .forEach(failedDocument -> {
+                        logSemanticError(LoggingContext.builder()
+                            .stage(HarvesterStage.PROCESS_RESOURCE)
+                            .harvesterStatus(HarvesterRun.Status.RUNNING)
+                            .message("Error indexing CSV")
+                            .additionalInfo("vocabularyIdentifier", vocabularyIdentifier)
+                            .additionalInfo("failedDocument", failedDocument)
+                            .build());
+                    });
+                return;
+            }
+            throw new SinglePathProcessingException("Error indexing CSV", e, true);
+        }
     }
 
     public void dropCsvIndicesForRepo(String repoUrl, Instance instance) {
