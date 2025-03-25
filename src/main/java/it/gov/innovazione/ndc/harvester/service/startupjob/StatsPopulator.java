@@ -12,6 +12,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -127,6 +128,39 @@ public class StatsPopulator implements StartupJob {
         log.info("Populating stats");
         populateRepoIfNecessary();
         harvestRepositories();
+        updateUids();
+    }
+
+    private void updateUids() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Basic " + getEncoder().encodeToString(("harv-user:harv-password").getBytes()));
+        headers.setContentType(APPLICATION_JSON);
+        ResponseEntity<List<HarvesterRun>> exchange = restTemplate.exchange(
+                "https://ndc-prod-blue.apps.cloudpub.istat.it/api/jobs/harvest/run",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {
+                });
+        List<HarvesterRun> productionRun = exchange.getBody().stream()
+                .filter(hr -> hr.getStatus()== HarvesterRun.Status.SUCCESS)
+                .toList();
+        Map<String, List<HarvesterRun>> byHash = productionRun.stream()
+                .collect(groupingBy(HarvesterRun::getRevision));
+
+        List<HarvesterRun> allRun = harvesterRunService.getAllRuns()
+                .stream().filter(harvesterRun -> harvesterRun.getStatus()== HarvesterRun.Status.SUCCESS)
+                .toList();
+
+        allRun.forEach(run -> {
+            if (CollectionUtils.isEmpty(byHash.get(run.getRevision()))) {
+                log.info("No production run found for hash " + run.getRevision() + " at date " + run.getStartedAt());
+                return;
+            }
+            harvesterRunService.updateId(run,
+                    byHash.get(run.getRevision())
+                            .stream()
+                            .min(Comparator.comparing(HarvesterRun::getStartedAt)));
+        });
     }
 
     private void harvestRepositories() {

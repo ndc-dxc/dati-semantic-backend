@@ -89,7 +89,7 @@ public class HarvesterRunService {
     }
 
     public Optional<HarvesterRun> isHarvestingAlreadyExecuted(String repositoryId, String revision) {
-        return getRecentRuns(HARVESTING_RECENT_DAYS)
+        return getAllRuns().stream()
                 .filter(harvesterRun -> harvesterRun.getRepositoryId().equals(repositoryId))
                 .filter(harvesterRun -> harvesterRun.getStatus() == HarvesterRun.Status.SUCCESS)
                 .max(Comparator.comparing(HarvesterRun::getStartedAt))
@@ -273,6 +273,20 @@ public class HarvesterRunService {
                     .orElse(null);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    public void updateId(HarvesterRun run, Optional<HarvesterRun> min) {
+        if (min.isPresent()) {
+            HarvesterRun newRun = min.get();
+            if (newRun.getId().equals(run.getId())) {
+                return;
+            }
+            log.info("Updating run with hash " + run.getRevision() + " and id " + run.getId() + " to " + newRun.getId());
+            saveHarvesterRun(newRun);
+            String query = "UPDATE SEMANTIC_CONTENT_STATS SET HARVESTER_RUN_ID = ? WHERE HARVESTER_RUN_ID = ?";
+            jdbcTemplate.update(query, newRun.getId(), run.getId());
+            delete(run);
         }
     }
 }
